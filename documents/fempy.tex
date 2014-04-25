@@ -1,0 +1,539 @@
+\documentclass[10pt]{article}
+\usepackage{nomenclature}
+\usepackage{nomencl}
+\makenomenclature
+
+\begin{document}
+
+\section{Introduction}
+
+% -------------------------------------------------- Conservation Equations --- %
+\section{Conservation Equations}
+\label{sec:cons.eq}
+Given a conserved quantity contained in an enclosed domain $\Domain$, the rate
+of change of that quantity must be equal to the sum of the production of the
+quantity within the domain and the flux of the quantity through the boundary
+of the domain $\Boundary$. Mathematically, conservation laws can be expressed in the following general form
+%
+\nomenclature[s]{$\Domain$}{An enclosed domain} %
+\nomenclature[s]{$\Boundary$}{Boundary of domain $\Domain$} %
+%
+\begin{multline}
+  \label{eq:gen.cons.0}
+  \LeftDer{\int_{\Domain}f\left(\x, t\right)\dV}{t} = {
+    \int_{\Boundary}f\left(\x, t\right)\left(
+      \Velocity[n]\left(\x, t\right) -
+      \Velocity\left(\x, t\right)\DotProd\normal\left(\x, t\right)
+    \right)\dA
+  }\\
+  + \int_{\Boundary}g\left(\x, t\right)\dA + \int_{\Domain}h\left(\x, t\right)\dV
+\end{multline}
+%
+where %
+$f$ is a scalar, vector, or tensor valued conserved quantity, %
+$\Velocity[n]$ is the normal velocity of the boundary $\Boundary$, %
+$\Velocity$ is the material velocity, %
+$\normal$ is the outward unit normal to $\Boundary$, %
+$g$ is the surface source of $f$, and %
+$h$ is the volume source of $f$, respectively.%
+%
+\nomenclature[s]{$\Velocity[n]$}{Velocity normal to $\Boundary$} %
+\nomenclature[s]{$\Velocity$}{Material velocity, $\dot{\x}$} %
+\nomenclature[s]{$\normal$}{Outward unit normal of $\Boundary$}%
+
+Using \eqref{eq:gen.cons.0}, it can be shown that the conservation of mass, momentum, and energy can be written in local form as
+%
+\begin{align}
+  \label{eq:mass.bal}
+  \dMassDensity + \MassDensity\RightDel\DotProd\Velocity &= 0 \\
+  %
+  \label{eq:mom.bal}
+  \RightDel\DotProd\CauchyStress + \MassDensity\BodyForce &=
+  \MassDensity\Acceleration \\
+  %
+  \label{eq:en.bal}
+  \MassDensity\dIntEnergy - \CauchyStress\DDotProd\SymVelGrad +
+  \RightDel\DotProd\HeatFlux - \MassDensity\EnergyProduction &= 0
+\end{align}
+%
+where $\MassDensity$ is the material density, %
+$\CauchyStress$ is the Cauchy stress, %
+$\BodyForce$ is the body force per unit mass, %
+$\Acceleration$ is the material acceleration, %
+$\IntEnergy$ is the internal energy, %
+$\SymVelGrad$ is the symmetric part of the velocity gradient, %
+$\HeatFlux$ is the heat flux vector, and %
+$\EnergyProduction$ is the energy production per unit density.  %
+For shock loading, \eqref{eq:gen.cons.0} continues to apply and leads to additional
+Rankine-Hugoniot jump conditions that supplement the above local differential
+equations. %
+%
+\nomenclature[x]{$\RightDel$}{Right del operator,
+  $\ds{\RightDel = \LPDer{\BaseTensor}{x_i}}$}%
+\nomenclature[x]{$\DotProd$}{Dot product,
+  $\boldsymbol{a}\DotProd\boldsymbol{b}=a_{i}b_{i}$}%
+\nomenclature[x]{$\DDotProd$}{Double dot product,
+  $\boldsymbol{A}\DDotProd\boldsymbol{B}=A_{ij}B_{ij}$}%
+\nomenclature[s]{$\MassDensity$}{Material density} %
+\nomenclature[s]{$\CauchyStress$}{Cauchy stress tensor} %
+\nomenclature[s]{$\BodyForce$}{Body force per unit mass} %
+\nomenclature[s]{$\Acceleration$}{Material acceleration, $\ddot{\x}$} %
+\nomenclature[s]{$\IntEnergy$}{Internal energy per unit mass} %
+\nomenclature[s]{$\SymVelGrad$}{Symmetric part of the velocity gradient, %
+  $\SymOp{\VelGrad}$} %
+\nomenclature[s]{$\HeatFlux$}{Heat flux vector} %
+\nomenclature[s]{$\EnergyProduction$}{Energy production per unit mass} %
+%
+The remainder of this section is devoted to deriving Equations
+\ref{eq:mass.bal}--\ref{eq:en.bal} and can be skipped without loss of continuity.
+
+% ---------------------------------------------------- Conservation of Mass --- %
+\subsection{Conservation of Mass }
+The law of conservation of mass states
+%
+\begin{equation}
+  \label{eq:cons.mass.1}
+  \MatDer{}\int_{\Omega}\MassDensity\dV = 0
+\end{equation}
+%
+Applying Leibniz rule and noting that the result must hold for arbitrary
+sub-bodies, a local form of the conservation of mass is
+%
+\begin{equation}
+  \label{eq:cons.mass.2}
+  \dot{\MassDensity} + \MassDensity(\Velocity\DotProd\LeftDel) = 0
+\end{equation}
+%
+An alternative version of conservation of mass is the statement that the element
+of mass, $\dd m$, must not change:
+%
+\begin{equation}
+  \label{eq:cons.mass.3}
+  \dd m = \MassDensity\dV = \MassDensity[0]\dV_0
+  \Longrightarrow
+  \MassDensity[0] = \MassDensity\Jacobian
+\end{equation}
+
+% ------------------------------------------------ Conservation of Momentum --- %
+\subsection{Conservation of Linear Momentum}
+Equating the net force on a body $\Omega$ to the rate of change of its linear
+momentum requires
+%
+\begin{equation}
+  \label{eq:lin.mom.bal.0}
+  \LeftDer{\int_{\Domain}\MassDensity\Acceleration\dV}{t} = {
+    \int_{\Boundary}\Traction\dA +
+    \int_{\Domain}\boldsymbol{b}\MassDensity\dV
+  }
+\end{equation}
+%
+\nomenclature[s]{$\Traction$}{Traction, force per unit length} %
+%
+Substituting $\Traction=\CauchyStress\DotProd\normal$, results in the Cauchy's first law of motion:
+
+%
+\begin{equation}
+  \label{eq:cauchy.first.law.0}
+  \MassDensity\boldsymbol{b} + \RightDel\DotProd\CauchyStress = \MassDensity\boldsymbol{a}
+\end{equation}
+%
+In terms of the reference configuration, Cauchy's first law can be written
+%
+\begin{equation}
+  \label{eq:cauchy.first.law.1}
+  \MassDensity[0]\boldsymbol{b} + \RightDel\DotProd\PKOne
+  = \MassDensity[0]\boldsymbol{a}
+\end{equation}
+%
+where $\PKOne$ is the first Piola-Kirchhoff stress, $\PKOne = \Jacobian\Inv{\DefGrad}\DotProd\CauchyStress$
+
+% ------------------------------------------- Conservation of Ang. Momentum --- %
+\subsection{Conservation of Angular Momentum}
+Conservation of angular momentum requires that the net torque on a body equal the
+rate of change of its angular momentum. Assuming no couple stresses, this
+requires that
+%
+\begin{equation}
+  \label{eq:ang.momentum}
+  \int_{\Omega}\MassDensity(\x\times\boldsymbol{b})\dV
+  + \int_{\partial \Omega}(\x\times\Traction)\dA
+  = \int_{\Omega}\rho(\x\times\boldsymbol{a})\dV
+\end{equation}
+%
+which leads to the conclusion that the Cauchy stress must be symmetric:
+%
+\begin{equation}
+  \label{eq:cauchy.symmetric}
+  \CauchyStress = \Trans{\CauchyStress}
+  \Longrightarrow
+  \DefGrad\DotProd\PKOne=\Trans{\PKOne}\DotProd\Trans{\DefGrad}
+\end{equation}
+
+% -------------------------------------------------- Conservation of Energy --- %
+\subsection{Conservation of Energy}
+The first law of thermodynamics, which is verified experimentally, states that, for any physical process going from one state of equilibrium to another, the sum of the total work and heat inputs to a Lagrangian system is path independent and therefore must equal the change in a state variable $\SpecEnergy$, which we call the specific energy. It is typical to decompose $\SpecEnergy$ additively into kinetic and internal parts
+%
+\begin{align}
+  \nonumber
+  e &= K + \IntEnergy \\
+  \label{eq:specenergyrelat}
+  &= \OneHalf\Velocity\DotProd\Velocity + \IntEnergy
+\end{align}
+%
+where $K=1/2\Velocity\DotProd\Velocity$ is the kinetic energy and $\IntEnergy$ is the specific
+internal energy.
+
+Introducing the energy and power densities, the first law may be written in
+local, per mass, form as
+%
+\begin{equation}
+  \label{eq:localfirstlaw}
+  \dot{\IntEnergy} = \Power{s} + \Power{T}
+\end{equation}
+%
+where $\Power{s}$ and $\Power{T}$ are the stress and thermal power, respectively.
+This form of the first law gives a clear physical interpretation: the rate of
+change of internal energy is equal to the sum of the stress power of deformation
+and the thermal heating power. Using the definitions of stress and thermal power,
+the first law may be written as
+%
+\begin{equation}
+  \label{eq:localfirstlawcomp}
+  \begin{split}
+    \dot{\IntEnergy} &= \frac{1}{\MassDensity}\CauchyStress\DDotProd\SymVelGrad
+    + r - \frac{1}{\MassDensity}\RightDel\DotProd\HeatFlux \\
+    %
+    \dot{\IntEnergy} &= \frac{1}{\MassDensity[0]}\PKTwo\DDotProd\dot{\Strain}
+    + r - \frac{1}{\MassDensity[0]}\RightDel\DotProd\hat{\HeatFlux}\\
+  \end{split}
+\end{equation}
+%
+where, $\PKTwo$ is the second Piola-Kirchhoff (reference) stress and
+$\hat{\HeatFlux}=\Jacobian\Inv{\DefGrad}\DotProd\HeatFlux$.
+
+The internal energy is commonly regarded as a state function of the other state variables; the general form of this function is restricted by the second law of thermodynamics as will be shown in the following subsection.
+
+% --------------------------------------------------- Finite Element Method --- %
+\section{Weak Form}
+Multiply strong form by virtual displacement $\VirtualDisplacement$ and
+integrate over domain
+%
+\begin{equation}
+  \int\left(
+    \Del\DotProd\CauchyStress + \MassDensity\boldsymbol{b} -
+    \MassDensity\boldsymbol{a}\right)\DotProd\VirtualDisplacement \, \dd\Domain
+  = 0
+\end{equation}
+
+Integrating by parts and applying Gauss' divergence theorem
+%
+\begin{equation}
+  \int\CauchyStress\DotProd\normal\DotProd\VirtualDisplacement\dd\Gamma
+  - \int\CauchyStress\DDotProd\Del\VirtualDisplacement\dd\Domain
+  + \int\MassDensity\boldsymbol{b}\DotProd\VirtualDisplacement\dd\Domain
+  - \int\MassDensity\boldsymbol{a}\DotProd\VirtualDisplacement\dd\Domain
+  = 0
+\end{equation}
+
+Approximate $\VirtualDisplacement$ by
+$\VirtualDisplacement\approx\VirtualDisplacement\Ith\ShapeFunction\Ith$
+
+\begin{equation}
+  \int{\Traction\DotProd\VirtualDisplacement\Ith\ShapeFunction\Ith\dd\Gamma}
+  - \int{\CauchyStress\DDotProd\VirtualDisplacement\Ith\Del\ShapeFunction\Ith
+    \dd\Domain}
+  + \int\MassDensity\boldsymbol{b}\DotProd\VirtualDisplacement\dd\Domain
+  - \int\MassDensity\boldsymbol{a}\DotProd\VirtualDisplacement\dd\Domain
+  = 0
+\end{equation}
+
+\begin{displaymath}
+  \MassDensity\boldsymbol{b} + \RightDel\DotProd\CauchyStress =
+  \MassDensity\boldsymbol{a}
+\end{displaymath}
+%
+Then
+%
+\begin{equation}
+  \label{eq:cauchy.first.law.1}
+  \SPDer{\Displacement}{\Time}{\Time} = \OneOver{\Density}\Del\DotProd\Stress +
+  \BodyForce
+\end{equation}
+
+Let $\Acceleration\left(\position, \Time\right) = \ddot{{\Displacement}}\left(\position, \Time\right)$ and
+
+Let $\Displacement\left(\position, \Time\right) =
+\NodalDisplacement(t)\BasisFunction\left(\position\right)$ and
+
+% ----------------------------------------------------------------------------- %
+\subsection{1D}
+\label{sec:1d}
+In 1D, the balance of linear momentum reduces to
+%
+\begin{equation}
+  \label{eq:mom.bal.1d}
+  \PDer{\left(\StressSym\Area\right)}{x} + \ForceSym =
+  \Density\Area\SPDer{\DisplacementSym}{\Time}{\Time}
+\end{equation}
+
+If material nonlinearity exists, i.e., $\StressSym$ is a nonlinear function of
+$\StrainSym$, multiply \eqref{eq:mom.bal.1d} by the weight function and
+integrate by parts ``as is''
+
+\begin{equation}
+  \label{eq:weak.form.1d.0}
+  \int_{0}^{L}\left(
+    \WeightFunction\PDer{\left(\StressSym\Area\right)}{x} +
+    \WeightFunction\ForceSym
+  \right)\dx
+  = \int_{0}^{L}{
+    \WeightFunction\Density\Area\SPDer{\DisplacementSym}{\Time}{\Time}
+  }
+\end{equation}
+
+\begin{equation}
+  \label{eq:weak.form.1d.1}
+  \WeightFunction\StressSym\Area\Big|_{0}^{L} -
+  \int_{0}^{L}\StressSym\PDer{\WeightFunction}{x}\Area\dx +
+  \int_{0}^{L}\WeightFunction\ForceSym\dx
+  = \int_{0}^{L}{
+    \WeightFunction\Density\Area\SPDer{\DisplacementSym}{\Time}{\Time}
+  }
+\end{equation}
+
+Let
+
+\begin{equation}
+  \begin{split}
+    \WeightFunction &= {
+      \sum_{i=0}^{N}\NodalWeight[i]\BasisFunction[i]\left(x\right)} \\
+    \DisplacementSym &= {
+      \sum_{i=0}^{N}\NodalDisplacement[j]\BasisFunction[j]\left(x\right)}
+  \end{split}
+\end{equation}
+
+Then, for interior nodes
+
+\begin{equation}
+  \label{eq:int.nodes.0}
+  \sum_{i=0}^{N}\left(
+    -\NodalWeight[i]\int_{0}^{L}\StressSym\BasisFunction[i]^{prime}\left(x\right)
+    \Area\dx +
+    \NodalWeight[i]\int_{0}^{L}\BasisFunction[i]\ForceSym\dx
+  \right)
+  = \sum_{i=0}^{N}\NodalWeight[i]\left(
+    \int_{0}^{L}\BasisFunction[i]\BasisFunction[j]\Density\Area\dx
+  \right)\ddot{u}_{j}
+\end{equation}
+%
+Define
+%
+\begin{equation}
+  \label{eq:f.ext.def}
+  \Force[i]^{ext} = \int_{0}^{L}\BasisFunction[i]\ForceSym\dx
+\end{equation}
+%
+to be the ``external'' force vector (known).
+%
+Define
+%
+\begin{equation}
+  \label{eq:f.int.def}
+  \Force[i]^{int} = \int_{0}^{L}\StressSym\BasisFunction[i]^{\prime}\Area\dx
+\end{equation}
+%
+to be the ``internal'' force vector (possibly unkown because stress depends
+nonlinearly on the displacement field).
+%
+Define
+%
+\begin{equation}
+  \label{eq:mass.mtx.def}
+  \MassMatrix[ij] = \int_{0}^{L}\BasisFunction[i]\BasisFunction[j]\Density\Area\dx
+\end{equation}
+%
+to be the mass matrix.
+
+Then, the discretized system is
+%
+\begin{equation}
+  \label{eq:disc.sys.1d}
+  \Force[i] = \sum_{j}\MassMatrix[ij]\Acceleration[j]
+\end{equation}
+%
+where
+\begin{equation}
+  \label{eq:force.def.0}
+  \Force[i] = \Force[i]^{ext} - \Force[i]^{int}, \quad
+  \Acceleration[j] = \ddot{u}_{j}
+\end{equation}
+
+% ----------------------------------------------------- Input file commands --- %
+\section{Input File Stuff}
+
+\begin{verbatim}
+wasatch
+  input
+exit
+\end{verbatim}
+
+\subsection{Solution Control}
+\begin{verbatim}
+solution control
+  <time integration = STRING (implicit|explicit)>
+  [start time = REAL] {0.}
+  [termination time = REAL] {1.}
+  [number of steps = INT] {10}
+  [tolerance = REAL] {1E-06}
+  [relax = REAL] {1}
+  [timestep multiplier = REAL] {1}
+end
+\end{verbatim}
+
+\subsection{Mesh}
+\begin{verbatim}
+mesh, <ascii|inline>
+  {mesh specification}
+  {mesh options}
+end
+\end{verbatim}
+
+\subsubsection{ascii Mesh}
+%
+\begin{verbatim}
+mesh, ascii
+  <quads|triangles|hexes>
+  vertices
+    REAL REAL [REAL]
+          .
+          .
+          .
+    REAL REAL [REAL]
+  end
+  connectivity
+    INT INT ... INT
+          .
+          .
+          .
+    INT INT ... INT
+  end
+end
+\end{verbatim}
+
+\subsubsection{Inline Mesh}
+%
+\begin{verbatim}
+mesh, inline
+  <bar2|quad4|hex8>
+    xblock INT REAL intervale INT
+    [xblock INT REAL intervale INT]
+               .
+               .
+    [yblock INT REAL intervale INT]
+               .
+               .
+    [zblock INT REAL intervale INT]
+               .
+               .
+  end
+end
+\end{verbatim}
+
+\subsubsection{Assigned Sets}
+\begin{verbatim}
+set assign
+  sideset INT (ilo|ihi|jlo|jhi|klo|khi|[INT, INT], ...)
+  nodeset INT (ilo|ihi|jlo|jhi|klo|khi|[INT, INT, ...])
+end
+\end{verbatim}
+
+\subsection{Blocks}
+\begin{verbatim}
+block INT
+  <block group>
+end
+\end{verbatim}
+\texttt{block group} is one of
+\begin{verbatim}
+block INT
+  material INT
+  element STRING
+end
+\end{verbatim}
+or
+\begin{verbatim}
+block INT
+  rve INT
+end
+\end{verbatim}
+
+\subsection{Functions}
+\begin{verbatim}
+function INT <piecewise linear|analytic expression>
+  <function definition>
+end
+\end{verbatim}
+\begin{verbatim}
+function INT analytic expression
+  f(x)
+end
+\end{verbatim}
+\begin{verbatim}
+function INT piecewise linear
+  REAL REAL
+      .
+      .
+      .
+  REAL REAL
+end
+\end{verbatim}
+
+\subsection{Material}
+\begin{verbatim}
+material INT
+  <model STRING>
+  STRING = REAL
+       .
+       .
+       .
+  STRING = REAL
+end
+\end{verbatim}
+
+\subsection{RVE}
+\begin{verbatim}
+rve INT
+  <material INT>
+  <parent element STRING> (QUAD4)
+  <child element STRING> (QUAD4)
+  <analysis driver = STRING> (wasatch)
+  <input template = STRING>
+  [refinement = INT] {10}
+  [keep intermediate results = STRING] (false|true) {true}
+end
+\end{verbatim}
+
+
+\subsection{Boundary Conditions}
+\texttt{prescribed force, nodeset INT, <REAL|FUNCTION SET>} \\
+\texttt{prescribed displacement, nodeset INT, <REAL|FUNCTION SET>} \\
+\texttt{traction bc, sideset INT, <REAL|FUNCTION SET>} \\
+\texttt{distributed load, block all, <REAL|FUNCTION SET>} \\
+
+\subsection{Function Set}
+\texttt{function INT [scale REAL]}
+
+
+
+% ----------------------------------------------------------------------------- %
+\printnomenclature[1.0in]
+
+
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

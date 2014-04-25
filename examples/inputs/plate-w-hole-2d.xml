@@ -1,0 +1,28 @@
+<WasatchModel>
+
+  <SolutionControl>
+    <StartTime> 0.000000E+00 </StartTime>
+    <TerminationTime> 5.000000E+00 </TerminationTime>
+    <TimeIntegrator> implicit </TimeIntegrator>
+  </SolutionControl>
+
+  <include href="../meshes/plate-hole-2d.mesh"/>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="10" dof="X" constant="0.000000E+00"/>
+    <PrescribedDisplacement nodeset="20" dof="X" constant="1.000000E-01"/>
+    <PrescribedDisplacement nodeset="30" dof="ALL" constant="0.000000E+00"/>
+  </Boundary>
+
+  <Blocks>
+    <Block id="1" material="1"/>
+  </Blocks>
+
+  <Materials>
+    <Material id="1" model="elastic">
+      <E> 1.000000E+02 </E>
+      <Nu> 3.000000E-01 </Nu>
+    </Material>
+  </Materials>
+
+</WasatchModel>

@@ -1,0 +1,55 @@
+<WasatchModel>
+
+  <SolutionControl>
+    <StartTime> 0. </StartTime>
+    <TerminationTime> 5. </TerminationTime>
+    <TimeIntegrator> implicit </TimeIntegrator>
+  </SolutionControl>
+
+  <Mesh type="ascii">
+
+    <Vertices>
+      0.000000e+00  0.000000e+00  0.000000e+00
+      2.000000e+00  0.000000e+00  0.000000e+00
+      0.000000e+00  1.000000e+00  0.000000e+00
+      2.000000e+00  1.000000e+00  0.000000e+00
+    </Vertices>
+
+    <Connectivity dim="2">
+      0 1 2
+      1 3 2
+    </Connectivity>
+
+    <AssignGroups>
+      <Nodeset id="1" nodes="0 2"/>
+      <Nodeset id="2" nodes="1 3" />
+      <Block id="1" elements="1" eltype="ELT3"/>
+      <Block id="2" elements="unassigned" eltype="ELT3"/>
+    </AssignGroups>
+
+  </Mesh>
+
+  <Blocks>
+    <Block id="1" material="1"/>
+    <Block id="2" material="2"/>
+  </Blocks>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="1" dof="all" constant="0."/>
+    <PrescribedDisplacement nodeset="2" dof="x" constant=".2"/>
+  </Boundary>
+
+  <Materials>
+    <Material id="1" model="elastic">
+      <K> 3.800E+10 </K>
+      <Mu> 1.425E+10 </Mu>
+      <A1> 1.000E+99 </A1>
+    </Material>
+
+    <Material id="2" model="elastic">
+      <e> 38.e9 </e>
+      <nu> 3.33333333333e-01 </nu>
+    </Material>
+  </Materials>
+
+</WasatchModel>

@@ -1,0 +1,55 @@
+<WasatchModel>
+
+  <SolutionControl>
+    <StartTime> 0. </StartTime>
+    <TerminationTime> {TTERM} </TerminationTime>
+    <NumberOfSteps> 1 </NumberOfSteps>
+    <TimeIntegrator> implicit </TimeIntegrator>
+    <Verbosity> 0 </Verbosity>
+  </SolutionControl>
+
+  <Mesh type="inline">
+
+    <Quad xmin="{XMIN}" ymin="{YMIN}">
+      <XBlock order="1" length="{XLEN}" interval="{XINT}"/>
+      <YBlock order="1" length="{YLEN}" interval="{YINT}"/>
+    </Quad>
+
+    <AssignGroups>
+      <Nodeset id="1" atpoint="{X0Y0}"/>
+      <Nodeset id="2" atpoint="{X1Y0}"/>
+      <Nodeset id="3" atpoint="{X1Y1}"/>
+      <Nodeset id="4" atpoint="{X0Y1}"/>
+      <Block id="1" elements="all" eltype="quad4"/>
+    </AssignGroups>
+  </Mesh>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="1" dof="X" constant="{X0Y0_X}"/>
+    <PrescribedDisplacement nodeset="1" dof="Y" constant="{X0Y0_Y}"/>
+    <PrescribedDisplacement nodeset="2" dof="X" constant="{X1Y0_X}"/>
+    <PrescribedDisplacement nodeset="2" dof="Y" constant="{X1Y0_Y}"/>
+    <PrescribedDisplacement nodeset="3" dof="X" constant="{X1Y1_X}"/>
+    <PrescribedDisplacement nodeset="3" dof="Y" constant="{X1Y1_Y}"/>
+    <PrescribedDisplacement nodeset="4" dof="X" constant="{X0Y1_X}"/>
+    <PrescribedDisplacement nodeset="4" dof="Y" constant="{X0Y1_Y}"/>
+  </Boundary>
+
+  <Blocks>
+    <Block id="1" material="1"/>
+  </Blocks>
+
+  <Materials>
+    <Material id="1" model="elastic">
+      <E> 6.8000000E+10 </E>
+      <Nu> 3.3333333E-01 </Nu>
+    </Material>
+  </Materials>
+
+</WasatchModel>
+
+<!--
+Local Variables:
+Mode: xml
+End:
+-->

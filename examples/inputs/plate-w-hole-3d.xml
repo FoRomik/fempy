@@ -1,0 +1,39 @@
+<WasatchModel>
+
+  <SolutionControl>
+    <StartTime> 0. </StartTime>
+    <TerminationTime> 1. </TerminationTime>
+    <NumberOfSteps> 1 </NumberOfSteps>
+    <TimeIntegrator> implicit </TimeIntegrator>
+  </SolutionControl>
+
+  <Materials>
+    <Material id="1" model="elastic">
+      <E> 100.e0 </E>
+      <Nu> 0.3e0 </Nu>
+    </Material>
+  </Materials>
+
+  <Blocks>
+    <Block id="1" material="1"/>
+  </Blocks>
+
+  <Functions>
+    <Function id="1" type="piecewise linear">
+      0.0 0.0
+      10.0 0.1
+    </Function>
+  </Functions>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="1" dof="z" constant="0."/>
+    <PrescribedDisplacement nodeset="20" dof="y" constant="0."/>
+    <PrescribedDisplacement nodeset="10" dof="x" constant="0."/>
+    <PrescribedDisplacement nodeset="15" dof="x" function="1"/>
+  </Boundary>
+
+  <Mesh type="ascii">
+    <include href="../mesh/plate-hole-3d.mesh"/>
+  </Mesh>
+
+</WasatchModel>

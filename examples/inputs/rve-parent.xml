@@ -1,0 +1,62 @@
+
+<WasatchModel>
+
+  <SolutionControl>
+    <StartTime> 0. </StartTime>
+    <TerminationTime> 5. </TerminationTime>
+    <NumberOfSteps> 2 </NumberOfSteps>
+    <TimeIntegrator> implicit </TimeIntegrator>
+    <Tolerance> .01 </Tolerance>
+  </SolutionControl>
+
+  <Mesh type="inline">
+    <Quad>
+      <XBlock order="1" length="3." interval="3"/>
+      <YBlock order="1" length="3." interval="3"/>
+    </Quad>
+    <AssignGroups>
+      <Nodeset id="1" sub_domain="ilo"/>
+      <Nodeset id="2" sub_domain="ihi"/>
+      <Block id="1" elements="unassigned" eltype="ELQ4"/>
+      <Block id="2" elements="4" eltype="ELQ4"/>
+    </AssignGroups>
+  </Mesh>
+
+  <Blocks>
+    <Block id="1" material="1"/>
+    <Block id="2" material="2"/>
+  </Blocks>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="1" dof="all" constant="0."/>
+    <PrescribedDisplacement nodeset="2" dof="x" constant="-.1"/>
+  </Boundary>
+
+  <Materials>
+    <Material id="1" model="elastic">
+      <E> 6.8E+10 </E>
+      <NU> 3.33333E-01 </NU>
+    </Material>
+
+    <Material id="2" model="rve">
+      <ParentElement> ELQ4 </ParentElement>
+      <Refinement> 10 </Refinement>
+      <AnalysisDriver> wasatch </AnalysisDriver>
+      <KeepIntermediateResults> false </KeepIntermediateResults>
+      <InputTemplate> rve-child.template </InputTemplate>
+    </Material>
+
+  </Materials>
+
+  <Functions>
+    <Function id="1" type="analytic expression">
+      sin(x)
+    </Function>
+    <Function id="2" type="piecewise linear" columns="time force">
+      0. 2.
+      1. 3.
+      2. 4.
+    </Function>
+  </Functions>
+
+</WasatchModel>

@@ -1,0 +1,55 @@
+<WasatchModel>
+
+  <SolutionControl>
+    <StartTime> 0. </StartTime>
+    <TerminationTime> 5. </TerminationTime>
+    <NumberOfSteps> 2 </NumberOfSteps>
+    <TimeIntegrator> implicit </TimeIntegrator>
+  </SolutionControl>
+
+  <Functions>
+    <Function id="2" type="analytic expression">
+      10. * x
+    </Function>
+    <Function id="1" type="piecewise linear" columns="time force">
+      1 2.0
+      3 4.0
+      5 6.0
+    </Function>
+  </Functions>
+
+  <Mesh type="ascii">
+    <Vertices>
+      0.000000E+00  0.000000E+00  0.000000E+00
+      2.000000E+00  0.000000E+00  0.000000E+00
+      2.000000E+00  1.000000E+00  0.000000E+00
+      0.000000E+00  1.000000E+00  0.000000E+00
+    </Vertices>
+    <Connectivity dim="2">
+      0 1 2 3
+    </Connectivity>
+
+    <AssignGroups>
+      <Nodeset id="1" sub_domain="ilo"/>
+      <Sideset id="1" sub_domain="ihi"/>
+      <Block id="1" elements="all" eltype="ELQ4"/>
+    </AssignGroups>
+  </Mesh>
+
+  <Blocks>
+    <Block id="1" material="2"/>
+  </Blocks>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="1" dof="all" constant="0."/>
+    <Traction sideset="1" constant="10.e7"/>
+  </Boundary>
+
+  <Materials>
+    <Material id="2" model="elastic">
+      <E> 68.E9 </E>
+      <NU> 3.33333333333E-01 </NU>
+    </Material>
+  </Materials>
+
+</WasatchModel>

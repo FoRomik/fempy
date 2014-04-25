@@ -1,0 +1,34 @@
+<WasatchModel>
+
+  <SolutionControl>
+    <StartTime> 0. </StartTime>
+    <TerminationTime> 5. </TerminationTime>
+    <TimeIntegrator> implicit </TimeIntegrator>
+  </SolutionControl>
+
+  <Mesh type="ascii">
+    <include href="../meshes/circ_in_square_small.mesh"/>
+    <AssignGroups>
+      <Nodeset id="10" sub_domain="ilo"/>
+      <Nodeset id="20" sub_domain="ihi"/>
+      <Block id="1" elements="all" eltype="tri3"/>
+    </AssignGroups>
+  </Mesh>
+
+  <Blocks>
+    <Block id="1" material="1"/>
+  </Blocks>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="10" dof="x" constant="0."/>
+    <PrescribedDisplacement nodeset="20" dof="x" constant=".1"/>
+  </Boundary>
+
+  <Materials>
+    <Material id="1" model="elastic">
+      <E> 6.8E+10 </E>
+      <Nu> 3.33333E-01 </Nu>
+    </Material>
+  </Materials>
+
+</WasatchModel>

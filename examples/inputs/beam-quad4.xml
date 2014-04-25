@@ -1,0 +1,38 @@
+<WasatchModel>
+
+  <SolutionControl>
+    <StartTime> 0. </StartTime>
+    <TerminationTime> 5. </TerminationTime>
+    <NumberOfSteps> 50 </NumberOfSteps>
+    <TimeIntegrator> implicit </TimeIntegrator>
+  </SolutionControl>
+
+  <Mesh type="inline">
+    <Quad>
+      <XBlock order="1" length="9." interval="27"/>
+      <YBlock order="1" length="1." interval="3"/>
+    </Quad>
+    <AssignGroups>
+      <Nodeset id="1" sub_domain="ilo"/>
+      <Nodeset id="2" sub_domain="ihi"/>
+      <Block id="1" elements="all" eltype="ELQ4"/>
+    </AssignGroups>
+  </Mesh>
+
+  <Blocks>
+    <Block id="1" material="1"/>
+  </Blocks>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="1" dof="all" constant="0."/>
+    <PrescribedDisplacement nodeset="2" dof="y" constant="4."/>
+  </Boundary>
+
+  <Materials>
+    <Material id="1" model="elastic">
+      <E> 6.8E+10 </E>
+      <NU> 3.33333E-01 </NU>
+    </Material>
+  </Materials>
+
+</WasatchModel>

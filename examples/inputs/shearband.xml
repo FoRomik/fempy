@@ -1,0 +1,48 @@
+<WasatchProblem>
+
+  <SolutionControl>
+    <StartTime> 0. </StartTime>
+    <TerminationTime> 1. </TerminationTime>
+    <Tolerance> .05 </Tolerance>
+    <NumberOfSteps> 10 </NumberOfSteps>
+    <TimeIntegrator> implicit </TimeIntegrator>
+  </SolutionControl>
+
+  <Mesh type="inline">
+    <Quad>
+      <XBlock order="1" length="5." interval="15"/>
+      <YBlock order="1" length="4." interval="12"/>
+    </Quad>
+    <AssignGroups>
+      <Nodeset id="1" sub_domain="jlo"/>
+      <Nodeset id="2" nodes="0"/>
+      <Nodeset id="3" sub_domain="jhi"/>
+      <Block id="1" elements="unassigned" eltype="ELQ4"/>
+      <Block id="2" elements="0" eltype="ELQ4"/>
+    </AssignGroups>
+  </Mesh>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="1" dof="all" constant="0."/>
+    <PrescribedDisplacement nodeset="3" dof="all" constant="-.1"/>
+  </Boundary>
+
+  <Blocks>
+    <Block id="1" material="1"/>
+    <Block id="2" material="1"/>
+  </Blocks>
+
+  <Materials>
+    <Material id="1" model="plastic">
+      <K> 6.89000E+10 </K>
+      <Mu> 2.58375E+10 </Mu>
+      <A1> 2.76000E+08 </A1>
+    </Material>
+    <Material id="2" model="plastic">
+      <K> 6.89000E+10 </K>
+      <Mu> 2.58375E+10 </Mu>
+      <A1> 2.36000E+08 </A1>
+    </Material>
+  </Materials>
+
+</WasatchProblem>

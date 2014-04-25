@@ -1,0 +1,69 @@
+<WasatchModel>
+
+  <SolutionControl>
+    <TerminationTime> 1. </TerminationTime>
+    <TimeIntegrator> implicit </TimeIntegrator>
+  </SolutionControl>
+
+  <Mesh type="ascii">
+    <Vertices>
+      0.000E+00  0.000E+00
+      2.500E-01  0.000E+00
+      5.000E-01  0.000E+00
+      7.500E-01  0.000E+00
+      1.000E+00  0.000E+00
+      0.000E+00  2.500E-01
+      2.250E-01  2.250E-01
+      4.500E-01  2.000E-01
+      6.870E-01  2.913E-01
+      9.239E-01  3.827E-01
+      0.000E+00  5.000E-01
+      2.000E-01  4.500E-01
+      4.000E-01  4.000E-01
+      5.505E-01  5.505E-01
+      7.010E-01  7.010E-01
+      0.000E+00  7.500E-01
+      2.913E-01  6.869E-01
+      3.827E-01  9.239E-01
+      0.000E+00  1.000E+00
+    </Vertices>
+    <Connectivity dim="2">
+         0  1  6  5
+         1  2  7  6
+         2  3  8  7
+         3  4  9  8
+         5  6 11 10
+         6  7 12 11
+         7  8 13 12
+         8  9 14 13
+        10 11 16 15
+        11 12 13 16
+        13 14 17 16
+        15 16 17 18
+    </Connectivity>
+    <AssignGroups>
+      <Nodeset id="10" sub_domain="ilo"/>
+      <Nodeset id="20" sub_domain="jlo"/>
+      <Nodeset id="40" nodes="18"/>
+      <Block id="1" elements="all" eltype="ELQ4"/>
+    </AssignGroups>
+  </Mesh>
+
+  <Blocks>
+    <Block id="1" material="1"/>
+  </Blocks>
+
+  <Boundary>
+    <PrescribedDisplacement nodeset="10" dof="x" constant="0."/>
+    <PrescribedDisplacement nodeset="20" dof="y" constant="0."/>
+    <PrescribedForce nodeset="40" dof="y" constant="-5."/>
+  </Boundary>
+
+  <Materials>
+    <Material id="1" model="elastic">
+      <E> 1.0E+03 </E>
+      <Nu> 2.5E-01 </Nu>
+    </Material>
+  </Materials>
+
+</WasatchModel>

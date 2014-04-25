@@ -1,0 +1,45 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module plastic ! in
+    interface  ! in :plastic
+        subroutine plastic_check(ui) ! in :plastic:plastic_interface.f90
+            use plastic, only: pchk
+            integer, parameter :: nui=5
+            real(kind=8) dimension(nui),intent(inout) :: ui
+        end subroutine plastic_check
+        subroutine plastic_request_xtra(ui,nxtra,namea,keya,xtra) ! in :plastic:plastic_interface.f90
+            use plastic, only: prxv
+            integer, parameter :: nui=5, nx=2
+            real(kind=8) dimension(nui),intent(in) :: ui
+            integer intent(out) :: nxtra
+            character(len=1) dimension(nx*50),intent(out) :: namea
+            character(len=1) dimension(nx*10),intent(out) :: keya
+            real(kind=8) dimension(nx),intent(out) :: xtra
+        end subroutine plastic_request_xtra
+        subroutine plastic_update_state(nx,dt,ui,d,stress,xtra) ! in :plastic:plastic_interface.f90
+            use plastic, only: pcalc
+            integer, parameter :: nui=5
+            integer, optional,intent(in),check(shape(xtra,0)==nx),depend(xtra) :: nx=shape(xtra,0)
+            real(kind=8) intent(in) :: dt
+            real(kind=8) dimension(nui),intent(in) :: ui
+            real(kind=8) dimension(6),intent(in) :: d
+            real(kind=8) dimension(6),intent(inout) :: stress
+            real(kind=8) dimension(nx),intent(inout) :: xtra
+        end subroutine plastic_update_state
+        subroutine plastic_stiff(nx,dt,ui,d,stress,xtra,j) ! in :plastic:plastic_interface.f90
+            use plastic, only: pstiff
+            integer, parameter :: nui=5
+            integer, optional,intent(in),check(shape(xtra,0)==nx),depend(xtra) :: nx=shape(xtra,0)
+            real(kind=8) intent(in) :: dt
+            real(kind=8) dimension(nui),intent(in) :: ui
+            real(kind=8) dimension(6),intent(in) :: d
+            real(kind=8) dimension(6),intent(in) :: stress
+            real(kind=8) dimension(nx),intent(in) :: xtra
+            real(kind=8) dimension(6,6),intent(out) :: j
+        end subroutine plastic_stiff
+    end interface
+end python module plastic
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
