@@ -153,7 +153,7 @@ class Genesis(object):
             self.db.createVariable(PX_VAR_COORDS(i), DTYPE_FLT, (DIM_NUM_NODES,))
             self.db.variables[PX_VAR_COORDS(i)][:] = np.zeros(num_nodes)
 
-        elem_map = np.arange(num_elem) + 1
+        elem_map = np.arange(num_elem)
 #        self.db.createDimension(DIM_NUM_EM, 1)
         self.db.createVariable(VAR_ELEM_NUM_MAP, DTYPE_INT, (DIM_NUM_ELEM,))
         self.put_elem_num_map(elem_map)
@@ -214,7 +214,7 @@ class Genesis(object):
         num_elem = self.db.dimensions[DIM_NUM_ELEM]
         if len(elem_map) > num_elem:
             raise ExodusIIFileError("len(elem_map) > num_elem")
-        self.db.variables[VAR_MAP][:] = elem_map
+        self.db.variables[VAR_MAP][:] = elem_map + 1
         return
 
     def put_elem_num_map(self, elem_num_map):
@@ -240,7 +240,7 @@ class Genesis(object):
         num_elem = self.db.dimensions[DIM_NUM_ELEM]
         if len(elem_num_map) > num_elem:
             raise ExodusIIFileError("len(elem_map) > num_elem")
-        self.db.variables[VAR_ELEM_NUM_MAP][:] = elem_num_map
+        self.db.variables[VAR_ELEM_NUM_MAP][:] = elem_num_map + 1
         return
 
     def put_elem_block(self, elem_blk_id, elem_type, num_elem_this_blk,

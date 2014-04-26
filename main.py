@@ -11,7 +11,9 @@ D, F = os.path.split(os.path.realpath(__file__))
 
 from runopts import set_runopt, has_c_compiler
 from utilities.errors import WasatchError
-import core.fe_model as fem
+import model.fe_model as fem
+import mesh.mesh as femesh
+from utilities.inpparse import UserInputParser
 sys.tracebacklimit = 20
 
 
@@ -30,7 +32,7 @@ def run_from_cl(argv=None):
         help="Debug mode [default: %(default)s]")
     parser.add_argument("--sqa", default=False, action="store_true",
         help="SQA mode [default: %(default)s]")
-    parser.add_argument("-v", default=None, type=int,
+    parser.add_argument("-v", default=1, type=int,
         help="Verbosity [default: %(default)s]")
     parser.add_argument("--wm", default=False, action="store_true",
         help="Write mesh to ascii file [default: %(default)s]")
@@ -67,22 +69,52 @@ def run_from_cl(argv=None):
 
     ti = time.time()
 
-    infile = args.file
-    if args.d is not None:
-        fdir, fname = os.path.split(os.path.realpath(args.file))
-        if args.d == "_RUNID_":
-            d = os.path.join(fdir, os.path.splitext(fname)[0])
-        else:
-            d = os.path.realpath(args.d)
-        try: os.makedirs(d)
-        except OSError: pass
-        infile = os.path.join(d, fname)
-        try: os.remove(infile)
-        except: pass
-        shutil.copyfile(args.file, infile)
-        os.chdir(d)
+    infile = os.path.realpath(args.file)
+    if not os.path.isfile(infile):
+        raise SystemExit("{0}: no such file".format(infile))
 
-    fe_model = fem.FEModel.from_input_file(infile, verbosity=args.v)
+    # find where to run the simulation
+    fdir, fname = os.path.split(infile)
+    runid, ext = os.path.splitext(fname)
+    rundir = args.d or os.getcwd()
+
+    if rundir != os.getcwd():
+        # wants to run simulation in alternate directory
+        if rundir == "_RUNID_":
+            rundir = os.path.join(fdir, runid)
+        else:
+            rundir = os.path.realpath(rundir)
+        try: os.makedirs(rundir)
+        except OSError: pass
+
+        dest = os.path.join(rundir, fname)
+        try: os.remove(dest)
+        except: pass
+
+        shutil.copyfile(infile, dest)
+        os.chdir(rundir)
+
+        infile = dest
+
+    input_lines = open(infile, "r").read()
+    ui = UserInputParser(input_lines)
+    implicit = ui.control[0] == 0.
+    
+    # set up the mesh
+    mesh = femesh.Mesh(runid, ui.dim, ui.coords, ui.connect, ui.el_blocks,
+                       ui.ssets, ui.nsets, ui.prdisps, ui.prforces,
+                       ui.tractions, ui.blk_options, ui.materials)
+
+    if implicit:
+        import core.lento as lento
+        fe_model = lento.Lento(runid)
+    else:
+        import core.veloz as veloz
+        fe_model = veloz.Veloz(runid)
+
+    fe_model.attach_mesh(mesh)
+    fe_model.attach_control(ui.control)
+    fe_model.setup()
 
     if args.wm:
         fe_model.mesh.write_ascii(fe_model.runid)
@@ -105,6 +137,7 @@ def run_from_cl(argv=None):
     fe_model.logger.write("wasatch: total simulation time: {0:.2f}s".format(
             tf - ti))
     fe_model.logger.close()
+
     return retval
 
 if __name__ == "__main__":

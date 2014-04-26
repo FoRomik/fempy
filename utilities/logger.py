@@ -1,17 +1,15 @@
 import os
 import sys
 
+import runopts as ro
+
 
 class Logger(object):
     def __init__(self):
         self.f = None
         self.fh = None
         self.ch = sys.stdout
-        self.verbosity = 1
         pass
-
-    def set_verbosity(self, verbosity):
-        self.verbosity = verbosity
 
     def add_file_handler(self, filename):
         self.f = filename
@@ -20,10 +18,15 @@ class Logger(object):
 
     def write(self, message, beg="", end="\n"):
         message = "{0}{1}{2}".format(beg, message, end)
-        if self.verbosity:
+        if ro.VERBOSITY:
             self.ch.write(message)
         if self.fh:
             self.fh.write(message)
+
+    def write_formatted(self, *args, **kwargs):
+        fmt = kwargs["fmt"]
+        message = fmt.format(*args)
+        self.write(message)
 
     def flush(self):
         self.ch.flush()
@@ -37,7 +40,7 @@ class Logger(object):
 
     def write_intro(self, integration, runid, nsteps, tol, maxit, relax,
                     tstart, tterm, ndof, nelems, nnode, elements):
-        return """\
+        message = """\
 Starting Wasatch simulation for {1}
 
 Summary of simulation input
@@ -63,6 +66,7 @@ Summary of simulation input
       number of vertices = {10:d}
 """.format(integration, runid, nsteps, tol, maxit, relax, tstart, tterm,
            ndof, nelems, nnode)
+        self.write(message)
 
 
 logger = Logger()

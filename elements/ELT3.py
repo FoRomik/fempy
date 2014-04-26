@@ -60,6 +60,7 @@ class SHT3(ShapeFunction):
 class ELT3(Element, SHT3):
     """Constant strain triangle"""
     name = "ELT3"
+    elem_type = "TRI"
     eid = 4
     nnodes = 3
     ncoord = 2

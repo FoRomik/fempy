@@ -11,7 +11,7 @@
     <AssignGroups>
       <Nodeset id="10" sub_domain="ilo"/>
       <Nodeset id="20" sub_domain="ihi"/>
-      <Block id="1" elements="all" eltype="tri3"/>
+      <Block id="1" elements="all" eltype="ELT3"/>
     </AssignGroups>
   </Mesh>
 

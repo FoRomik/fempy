@@ -490,7 +490,7 @@
     <Nodeset id="10" nodes="17 34 35 36 37 38 39 40 41 42"/>
     <Nodeset id="20" nodes="16 19 57 58 59 60 61 62 63 64 65"/>
     <Nodeset id="30" nodes="18"/>
-    <Block id="1" elements="all" eltype="tri3"/>
+    <Block id="1" elements="all" eltype="elt3"/>
   </AssignGroups>
 
 </Mesh>

@@ -5,7 +5,7 @@ import numpy as np
 import multiprocessing as mp
 
 from runopts import VERBOSITY
-import utilities.exomgr as exomgr
+import model.exomgr as exomgr
 from utilities.errors import WasatchError
 from utilities.constants import HUGE
 from utilities.logger import Logger

@@ -3,6 +3,8 @@ import numpy as np
 from scipy.weave import inline, converters
 
 import runopts as ro
+from variables.varinc import *
+from model.model_data import eb_data
 from utilities.tensor import asarray, asmatrix, reduce_map, reduce_map_C
 from utilities.tensor import axialv, axialt
 from utilities.tensor import NSYMM, NTENS, I3x3, I6, I9
@@ -49,8 +51,8 @@ class Element(object):
     rho = 1.
     lumped_mass = 1.
 
-    def __init__(self, elid, nodes, coords, material, mat_params, perturbed,
-                 *args, **kwargs):
+    def __init__(self, elid, elem_blk_ids, nodes, coords, 
+                 material, mat_params, perturbed, *args, **kwargs):
         if len(nodes) != self.nnodes:
             raise UserInputError(
                 "{0}: {1} nodes required, got {2}".format(
@@ -74,6 +76,7 @@ class Element(object):
                                  .format(self.name))
         ro.reducedint = self.reducedint
         self.elid = elid
+        self.elid_this_blk, self.elem_blk_id = elem_blk_ids
         self.ievar = 0
 
         self.register_variable("CAUCHY-STRESS", vtype="SYMTENS")
@@ -141,6 +144,20 @@ class Element(object):
 
         else:
             raise WasatchError("{0}: unrecognized vtype".format(vtype))
+
+
+    def register_elem_data(self):
+        ebid = self.elem_blk_id
+        eb_data[ebid].register_variable("CAUCHY-STRESS", VAR_SYMTENSOR)
+        eb_data[ebid].register_variable("LEFT-STRETCH", VAR_SYMTENSOR,
+                                        initial_value=I6)
+        eb_data[ebid].register_variable("ROTATION", VAR_TENSOR, initial_value=I9)
+        eb_data[ebid].register_variable("SYMM-L", VAR_SYMTENSOR)
+        eb_data[ebid].register_variable("SKEW-L", VAR_SKEWTENSOR)
+        eb_data[ebid].register_variable("GREEN-STRAIN", VAR_SYMTENSOR)
+        xinit = self.material.initial_state()
+        for (i, var) in enumerate(self.material.variables()):
+            eb_data[ebid].register_variable(var, VAR_SCALAR, initial_val=xinit[i])
 
 
     def variables(self):
@@ -617,6 +634,8 @@ class Element(object):
         # now average over all Gauss points. This is not valid for all
         # elements, just a place holder
         self.data[1, self.ngauss] = np.average(self.data[1, :self.ngauss], axis=0)
+        j, i = self.elid_this_blk, self.elem_blk_id
+        eb_data[i].set_var("ELDAT", self.data[1, self.ngauss][:], j)
         return
 
     def advance_state(self):

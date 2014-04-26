@@ -4,20 +4,30 @@ import time
 import numpy as np
 
 import runopts as ro
-import core.fe_model as fem
+import model.fe_model as fem
 from utilities.lapackjac import linsolve
 from utilities.errors import WasatchError
+from utilities.logger import logger
 from core.glob_trxn import global_traction
 from core.glob_resid import global_residual
 from core.glob_stiff import global_stiffness
 from core.boundary import apply_dirichlet_bcs
 from core.update_cell import update_element_states
+from variables.varinc import VAR_SCALAR, LOC_GLOB
+from model.model_data import global_data, nodal_data
 
+HEAD = """\
+ Step  Iteration   Load   Time   Time  Correction  Residual  Tolerance
+         Number   Factor         Step""" 
+ITER_FMT = ("{0:=4}    {1:=4}       {2:.2f}    {3:.2f}  {4:.2f}   "
+            "{5:.2E}   {6:.2E}   {7:.2E}")
 
 class Lento(fem.FEModel):
 
-    def __init__(self, runid, control, mesh):
-        super(Lento, self).__init__(runid, control, mesh)
+    def __init__(self, runid):
+        super(Lento, self).__init__(runid)
+
+        
 
     def solve(self, nproc=1, disp=0):
         """ 2D and 3D Finite Element Code
@@ -84,22 +94,23 @@ class Lento(fem.FEModel):
         nsteps, maxit = int(nsteps), int(maxit)
         t = tstart
         dt = (tterm - tstart) / float(nsteps) * dtmult
+        global_data.set_var("TIME", t)
+        global_data.set_var("TIME_STEP", dt)
+        nodal_data.set_var("DISPL", u)
 
         findstiff = True
 
-        self.logger.write_intro("Implicit", runid, nsteps, tol,
-                                maxit, relax, tstart, tterm,
-                                ndof, nelems, nnode, elements)
+        logger.write_intro("Implicit", runid, nsteps, tol,
+                            maxit, relax, tstart, tterm,
+                            ndof, nelems, nnode, elements)
+
+        logger.write(HEAD)
 
         for step in range(nsteps):
 
             loadfactor = float(step + 1) / float(nsteps)
             err1 = 1.
             t += dt
-
-            self.logger.write("Step {0:.5f} Load factor {1:.5f}, "
-                              "Time: {2}, Time step: {3}".format(
-                    step + 1, loadfactor, t, dt))
 
             # Newton-Raphson loop
             mult = 10 if step == 0 and ro.reducedint else 1
@@ -142,8 +153,8 @@ class Lento(fem.FEModel):
                 # --- Solve for the correction
                 c, dw, info = linsolve(K, b)
                 if info > 0:
-                    self.logger.write("using least squares to solve system",
-                                      beg="*** ")
+                    logger.write("using least squares to solve system",
+                                  beg="*** ")
                     dw = np.linalg.lstsq(K, b)[0]
                 elif info < 0:
                     raise WasatchError(
@@ -161,12 +172,8 @@ class Lento(fem.FEModel):
                     err1 = np.sqrt(err1 / wnorm)
                 err2 = np.sqrt(np.dot(b, b)) / float(ndof * nnode)
 
-                self.logger.write("Iteration number {0}: "
-                                  "Correction {1} "
-                                  "Residual {2} "
-                                  "tolerance {3}".format(
-                        nit, err1, err2, tol), beg="  ")
-
+                logger.write_formatted(step+1, nit+1, loadfactor, t, dt,
+                                       err1, err2, tol, fmt=ITER_FMT) 
                 if err1 < tol:
                     break
 
@@ -190,15 +197,19 @@ class Lento(fem.FEModel):
             for element in elements:
                 element.advance_state()
 
-            self.dump_time_step_data(t, dt, u)
+            global_data.set_var("TIME", t)
+            global_data.set_var("TIME_STEP", dt)
+            nodal_data.set_var("DISPL", u)
+
+            self.io.write_data_to_db()
 
             continue
 
         self.io.finish()
         tf = time.time()
 
-        self.logger.write("\n{0}: execution finished".format(self.runid))
-        self.logger.write("{0}: total execution time: {1:8.6f}s".format(
+        logger.write("\n{0}: execution finished".format(self.runid))
+        logger.write("{0}: total execution time: {1:8.6f}s".format(
                 runid, tf - t0))
 
         retval = 0

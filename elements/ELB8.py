@@ -160,6 +160,7 @@ gauss_coords:
 class ELB8(Element, SHB8):
     """Trilinear hex element"""
     name = "ELB8"
+    elem_type = "HEX"
     eid = 3
     ncoord = 3
     ndof = 3

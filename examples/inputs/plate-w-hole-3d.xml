@@ -33,7 +33,7 @@
   </Boundary>
 
   <Mesh type="ascii">
-    <include href="../mesh/plate-hole-3d.mesh"/>
+    <include href="../meshes/plate-hole-3d.mesh"/>
   </Mesh>
 
 </WasatchModel>

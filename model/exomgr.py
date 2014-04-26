@@ -4,6 +4,9 @@ import scipy.io as sio
 import datetime
 
 from exodusii import ExodusIIFile
+from variables.varinc import VAR_SCALAR, VAR_ARRAY
+import model.model_data as md
+
 
 class ExoManager(object):
     """The main IO manager
@@ -79,15 +82,21 @@ class ExoManager(object):
         for item in self.elem_blks:
             (elem_blk_id, elem_blk_els, elem_type,
              num_nodes_per_elem, ele_var_names) = item
+            num_elem_this_blk = len(elem_blk_els)
+
+            md.initialize_eb_data(elem_blk_id)
+            md.eb_data[elem_blk_id].register_variable("ELDAT", VAR_ARRAY, 
+                length=len(ele_var_names), repeat=num_elem_this_blk)
+
             # for now, we do not use attributes
             num_attr = 0
-            num_elem_this_blk = len(elem_blk_els)
             self.exofile.put_elem_block(elem_blk_id, elem_type, num_elem_this_blk,
                                         num_nodes_per_elem, num_attr)
 
             # write element connectivity for each element block
             blk_conn = conn[elem_blk_els][:, :num_nodes_per_elem]
             self.exofile.put_elem_conn(elem_blk_id, blk_conn)
+
             continue
 
         # write node sets
@@ -123,6 +132,7 @@ class ExoManager(object):
         self.num_glob_vars = len(glob_var_names)
         self.exofile.put_var_param("g", self.num_glob_vars)
         self.exofile.put_var_names("g", self.num_glob_vars, glob_var_names)
+        md.global_data.register_variables(["TIME"] + glob_var_names, VAR_SCALAR)
 
         nod_var_names = ["DISPLX", "DISPLY"]
         if self.num_dim == 3:
@@ -130,6 +140,9 @@ class ExoManager(object):
         self.num_nod_vars = len(nod_var_names)
         self.exofile.put_var_param("n", self.num_nod_vars)
         self.exofile.put_var_names("n", self.num_nod_vars, nod_var_names)
+        # tjf: wrong if num_dim != ndof
+        l = self.num_nodes * self.num_dim
+        md.nodal_data.register_variable("DISPL", VAR_ARRAY, length=l)
 
         self.num_elem_vars = len(ele_var_names)
         self.exofile.put_var_param("e", self.num_elem_vars)
@@ -145,18 +158,18 @@ class ExoManager(object):
 
         # write first step
         time_val = 0.
-        self.time_step = 0
-        self.exofile.put_time(self.time_step, time_val)
+        self.count = 0
+        self.exofile.put_time(self.count, time_val)
 
         # global values
         glob_var_vals = np.zeros(self.num_glob_vars, dtype=np.float64)
-        self.exofile.put_glob_vars(self.time_step, self.num_glob_vars,
+        self.exofile.put_glob_vars(self.count, self.num_glob_vars,
                                    glob_var_vals)
 
         # nodal values
         nodal_var_vals = np.zeros(self.num_nodes, dtype=np.float64)
         for k in range(self.num_nod_vars):
-            self.exofile.put_nodal_var(self.time_step, k, self.num_nodes,
+            self.exofile.put_nodal_var(self.count, k, self.num_nodes,
                                        nodal_var_vals)
             continue
 
@@ -164,15 +177,16 @@ class ExoManager(object):
         for (elem_blk_id, num_elem_this_blk, elem_blk_data) in all_element_data:
             for k in range(self.num_elem_vars):
                 self.exofile.put_elem_var(
-                    self.time_step, k, elem_blk_id,
+                    self.count, k, elem_blk_id,
                     num_elem_this_blk, elem_blk_data.T[k])
             continue
 
+        md.alloc_data()
         self.exofile.update()
-        self.time_step += 1
+        self.count += 1
         pass
 
-    def write_element_data(self, time, dt, all_element_data, u):
+    def write_data_to_db(self):
         """Dump information from current time step to results file
 
         Parameters
@@ -197,32 +211,35 @@ class ExoManager(object):
 
         """
 
+        time, dt = md.global_data.data
+        u = md.nodal_data.data
+
         # write time value
-        self.exofile.put_time(self.time_step, time)
+        self.exofile.put_time(self.count, time)
 
         # write global variables
         glob_var_vals = np.zeros(self.num_glob_vars)
         for j in range(self.num_glob_vars):
             glob_var_vals[j] = dt
             continue
-        self.exofile.put_glob_vars(self.time_step, self.num_glob_vars,
+        self.exofile.put_glob_vars(self.count, self.num_glob_vars,
                                    glob_var_vals)
 
         # write nodal variables
         for k in range(self.num_nod_vars):
-            self.exofile.put_nodal_var(self.time_step, k, self.num_nodes,
+            self.exofile.put_nodal_var(self.count, k, self.num_nodes,
                                        u[k::self.num_dim])
 
         # write element variables
-        for (elem_blk_id, num_elem_this_blk, elem_blk_data) in all_element_data:
-            for k in range(self.num_elem_vars):
-                self.exofile.put_elem_var(
-                    self.time_step, k, elem_blk_id,
-                    num_elem_this_blk, elem_blk_data.T[k])
+        for (elem_blk_id, elem_blk_vars) in md.eb_data.items():
+            num_elem = elem_blk_vars.data.shape[0]
+            for (k, data) in enumerate(elem_blk_vars.data.T):
+                self.exofile.put_elem_var(self.count, k, elem_blk_id, num_elem,
+                                          data)
             continue
 
         # udpate and close the file
-        self.time_step += 1
+        self.count += 1
         self.exofile.update()
 
         return

@@ -11,8 +11,7 @@ from materials.material import create_material
 class Mesh(object):
 
     def __init__(self, runid, dim, coords, connect, el_blocks, ssets, nsets,
-                 prdisps, prforces, tractions, block_options, materials,
-                 periodic_masters_slaves):
+                 prdisps, prforces, tractions, block_options, materials):
 
         self.dim = dim
         self._sidesets = {}
@@ -84,9 +83,6 @@ class Mesh(object):
         self._node_el_map = self.generate_node_el_map(
             self._coords.shape[0], self._conn)
 
-        if periodic_masters_slaves and len(periodic_masters_slaves) > 1:
-            raise UserInputError("Only one periodic bc currently supported")
-
         pass
 
     def nodes(self):
@@ -144,17 +140,9 @@ class Mesh(object):
         for key, val in block_options.items():
             mtlid = val[0]
             el_block = [x for x in el_blocks if x[0] == key][0]
-            i, etype, els, elopts = el_block
+            elem_blk_id, etype, els, elopts = el_block
             elopts["RUNID"] = runid
             mtl_name, mtl_params = materials.get(mtlid, (None, None))
-
-            # Check if element is an RVE
-            if mtl_name.lower() == "rve":
-                etype = "RVE"
-                elopts.update(mtl_params)
-                # give default elastic material
-                mtl_name = "elastic"
-                mtl_params = {"E": 10.0E+09, "NU": .333333333}
 
             if mtl_name is None:
                 raise UserInputError(
@@ -209,8 +197,9 @@ class Mesh(object):
                     p[key] = (i, val[iel])
                 nodes = connect[eid]
                 nodal_coords = coords[nodes]
-                elements[eid] = ecls(eid, nodes, nodal_coords, material,
-                                     matparams, p, **elopts)
+                elements[eid] = ecls(eid, (iel, elem_blk_id), nodes, 
+                                     nodal_coords, material, matparams, 
+                                     p, **elopts)
 
         del matparams
         del perturbed

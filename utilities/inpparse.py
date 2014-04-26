@@ -206,7 +206,7 @@ class UserInputParser:
         if mesh_type == "inline":
             eltype, dim, coords, connect = self.parse_inline_mesh(mesh)
             for el_block in el_blocks:
-                if eltype.lower()[:3] != el_block[1][:3]:
+                if eltype.lower()[0] != el_block[1][2]:
                     raise UserInputError("Mesh.inline: {0}: inconsistent element "
                                          "type for assigned block {1}".format(
                             el_block[1], el_block[0]))
